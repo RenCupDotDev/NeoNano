@@ -1,0 +1,5 @@
+[snippets]
+todo = "TODO: "
+hr = "\n---\n"
+fence = "```\n\n```"
+header = "# "

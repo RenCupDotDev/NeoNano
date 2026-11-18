@@ -1,0 +1,17 @@
+name = "neonano"
+
+[colors]
+background = "#2a2e45"
+text = "#9ba2ff"
+current_line = "#363b5a"
+gutter = "#938274"
+gutter_current = "#00c49a"
+header_fg = "#2a2e45"
+header_bg = "#938274"
+status_fg = "#00c49a"
+status_bg = "#2a2e45"
+error = "#ed6a5a"
+prompt_fg = "#2a2e45"
+prompt_bg = "#00c49a"
+selection_fg = "#2a2e45"
+selection_bg = "#9ba2ff"
