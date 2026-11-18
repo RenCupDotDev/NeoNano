@@ -16,7 +16,7 @@ set -euo pipefail
 
 APP=neonano
 CMD=nnano
-REPO="${NEONANO_REPO:-YOUR_GITHUB_USER/neonano}"
+REPO="${NEONANO_REPO:-RenCupDotDev/NeoNano}"
 BRANCH="${NEONANO_BRANCH:-main}"
 CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 
