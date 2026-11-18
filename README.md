@@ -19,13 +19,13 @@ keybinds, line numbers, autosave, and more.
 ### Linux: curl (recommended)
 
 ```
-curl -fsSL https://raw.githubusercontent.com/YOUR_GITHUB_USER/neonano/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/RenCupDotDev/NeoNano/main/install.sh | bash
 ```
 
 Per-user install with no root, into `~/.local/bin/nnano`:
 
 ```
-curl -fsSL https://raw.githubusercontent.com/YOUR_GITHUB_USER/neonano/main/install.sh | bash -s -- --user
+curl -fsSL https://raw.githubusercontent.com/RenCupDotDev/NeoNano/main/install.sh | bash -s -- --user
 ```
 
 Then start it:
@@ -47,7 +47,7 @@ bash install.sh --system      # /usr/local/share/neonano, /usr/local/bin/nnano (
 ### Uninstall
 
 ```
-curl -fsSL https://raw.githubusercontent.com/YOUR_GITHUB_USER/neonano/main/install.sh | bash -s -- --uninstall
+curl -fsSL https://raw.githubusercontent.com/RenCupDotDev/NeoNano/main/install.sh | bash -s -- --uninstall
 ```
 
 Add `--purge` to the end to delete your config too.
@@ -355,4 +355,4 @@ neonano/
 
 ## License
 
-MIT
+GNU GPL 3.0
