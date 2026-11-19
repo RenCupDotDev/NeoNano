@@ -1,12 +1,12 @@
 import curses
 import sys
 
-import config as cfgmod
-from actions import ACTIONS
-from buffer import Buffer
-from editor import Editor
-from plugin_loader import load_plugins
-from theme import build_theme
+import neonano.config as cfgmod
+from neonano.actions import ACTIONS
+from neonano.buffer import Buffer
+from neonano.editor import Editor
+from neonano.plugin_loader import load_plugins
+from neonano.theme import build_theme
 
 WELCOME = "F1 palette  Ctrl+S save  Ctrl+X quit  Alt+I config"
 
@@ -56,6 +56,15 @@ def main(stdscr, path):
     ed.emit("exit")
 
 
-if __name__ == "__main__":
+def run():
+    """Console-script entry point (the `nnano` command)."""
+    if len(sys.argv) > 1 and sys.argv[1] == "--version":
+        from importlib.metadata import version
+        print(f"neonano {version('neonano')}")
+        return
     file_path = sys.argv[1] if len(sys.argv) > 1 else None
     curses.wrapper(main, file_path)
+
+
+if __name__ == "__main__":
+    run()

@@ -1,10 +1,10 @@
 import curses
 import time
 
-import config as cfgmod
-from buffer import Buffer
-from keys import build_keymap, read_key
-from theme import build_theme, list_themes
+import neonano.config as cfgmod
+from neonano.buffer import Buffer
+from neonano.keys import build_keymap, read_key
+from neonano.theme import build_theme, list_themes
 
 CYCLE = ["left", "right", "none"]
 

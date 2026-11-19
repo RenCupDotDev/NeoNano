@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # neonano installer for Linux.
 #
-#   curl -fsSL https://raw.githubusercontent.com/YOUR_GITHUB_USER/neonano/main/install.sh | bash
-#   curl -fsSL https://raw.githubusercontent.com/YOUR_GITHUB_USER/neonano/main/install.sh | bash -s -- --user
+#   curl -fsSL https://raw.githubusercontent.com/RenCupDotDev/NeoNano/main/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/RenCupDotDev/NeoNano/main/install.sh | bash -s -- --user
 #
 # Or from a local copy:
 #   bash install.sh               install (system-wide if run as root, otherwise per-user)
@@ -89,7 +89,7 @@ fi
 # ----- find the source: local copy, or download from GitHub -----
 
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd || pwd)"
-if [ ! -f "$SRC/main.py" ] || [ ! -f "$SRC/VERSION" ]; then
+if [ ! -f "$SRC/neonano/main.py" ] || [ ! -f "$SRC/VERSION" ]; then
   command -v tar >/dev/null 2>&1 || die "tar is required"
   TMP_SRC="$(mktemp -d)"
   URL="https://github.com/$REPO/archive/refs/heads/$BRANCH.tar.gz"
@@ -125,9 +125,8 @@ PY
 say "installing neonano $VERSION ($MODE) to $SHARE_DIR"
 $SUDO rm -rf "$SHARE_DIR"
 $SUDO mkdir -p "$SHARE_DIR" "$BIN_DIR"
-$SUDO cp -a "$SRC"/. "$SHARE_DIR"/
+$SUDO cp -a "$SRC/neonano" "$SHARE_DIR"/
 $SUDO find "$SHARE_DIR" -name __pycache__ -type d -prune -exec rm -rf {} +
-$SUDO rm -f "$SHARE_DIR/install.sh"
 
 PY="$(command -v python3)"
 LAUNCHER="$(mktemp)"
@@ -137,7 +136,8 @@ cat > "$LAUNCHER" <<LAUNCH
 case "\$1" in
   --version) echo "neonano $VERSION"; exit 0 ;;
 esac
-exec "$PY" "$SHARE_DIR/main.py" "\$@"
+export PYTHONPATH="$SHARE_DIR\${PYTHONPATH:+:\$PYTHONPATH}"
+exec "$PY" -m neonano.main "\$@"
 LAUNCH
 $SUDO install -m 755 "$LAUNCHER" "$BIN"
 
