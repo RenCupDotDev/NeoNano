@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo.png" alt="neonano logo" width="160">
+  <img src="neonano/assets/logo.png" alt="neonano logo" width="160">
 </p>
 
 <h1 align="center">neonano</h1>
