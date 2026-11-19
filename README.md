@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="neonano/assets/logo.png" alt="neonano logo" width="160">
+  <img src="assets/logo.png" alt="neonano logo" width="160">
 </p>
 
 <h1 align="center">neonano</h1>
@@ -16,16 +16,26 @@ keybinds, line numbers, autosave, and more.
 
 ## Installation
 
-### Linux: curl (recommended)
+### Linux
+
+Run this and choose how to install:
 
 ```
 curl -fsSL https://raw.githubusercontent.com/RenCupDotDev/NeoNano/main/install.sh | bash
 ```
 
-Per-user install with no root, into `~/.local/bin/nnano`:
+The installer asks you to pick a method:
+
+1. **pipx** (recommended): an isolated install. The `nnano` command goes in `~/.local/bin`. Needs pipx.
+2. **uv**: the same kind of isolated install, using `uv tool`. Needs uv.
+3. **native**: copies the files and writes a small launcher. Needs no pip.
+
+To skip the question, pass a flag after `bash -s --`:
 
 ```
-curl -fsSL https://raw.githubusercontent.com/RenCupDotDev/NeoNano/main/install.sh | bash -s -- --user
+curl -fsSL https://raw.githubusercontent.com/RenCupDotDev/NeoNano/main/install.sh | bash -s -- --pipx
+curl -fsSL https://raw.githubusercontent.com/RenCupDotDev/NeoNano/main/install.sh | bash -s -- --uv
+curl -fsSL https://raw.githubusercontent.com/RenCupDotDev/NeoNano/main/install.sh | bash -s -- --native
 ```
 
 Then start it:
@@ -34,15 +44,20 @@ Then start it:
 nnano [file]
 ```
 
-Run the install command again to update. Your config is kept.
+Run the install command again to update to the latest release. Your config is kept. The installer removes any other neonano install first, so only one `nnano` is on your PATH.
 
-### Linux: from a local copy
+Other options:
+
+- `--tag v0.2.1` installs a specific release instead of the latest.
+- `--user` or `--system` picks where a native install goes. Without either, it's per-user unless you run as root.
+
+### Install from a local copy
 
 ```
-bash install.sh               # system-wide if root, otherwise per-user
-bash install.sh --user        # ~/.local/share/neonano, ~/.local/bin/nnano
-bash install.sh --system      # /usr/local/share/neonano, /usr/local/bin/nnano (uses sudo)
+bash install.sh
 ```
+
+If the script sits next to the repo, it installs from those files instead of downloading.
 
 ### Uninstall
 
@@ -50,22 +65,23 @@ bash install.sh --system      # /usr/local/share/neonano, /usr/local/bin/nnano (
 curl -fsSL https://raw.githubusercontent.com/RenCupDotDev/NeoNano/main/install.sh | bash -s -- --uninstall
 ```
 
-Add `--purge` to the end to delete your config too.
+This removes neonano from whichever method installed it. Your config is kept. Add `--purge` to delete your config too.
 
 ### Requirements
 
-Python 3.11 or newer with curses.
+Python 3.11 or newer with curses, plus pipx or uv if you use those methods.
 
-- Fedora: `sudo dnf install python3 ncurses`
-- Debian/Ubuntu: `sudo apt install python3 libncurses6`
+- Fedora: `sudo dnf install python3 ncurses`, and `sudo dnf install pipx` if you use pipx
+- Debian/Ubuntu: `sudo apt install python3 libncurses6`, and `sudo apt install pipx` if you use pipx
 
 ### Windows
 
-Run from the project folder with Python 3.11 or newer:
+The installer is for Linux. On Windows, install with Python 3.11 or newer:
 
 ```
 pip install windows-curses
-python main.py [file]
+pip install .
+nnano [file]
 ```
 
 Windows Terminal gives the best colors and key handling.
@@ -338,19 +354,22 @@ Colors can be hex (`"#rrggbb"`) or basic names (`black`, `red`, `green`, `yellow
 
 ```
 neonano/
-├── install.sh          installer (curl | bash)
-├── main.py             entry point and main loop
-├── config.default.toml documented defaults
-├── config.py           config loading and merging
-├── keys.py             key names and keymap
-├── buffer.py           text, selection, undo snapshots
-├── editor.py           drawing, prompt, layout, messages
-├── actions.py          built-in keybind actions
-├── commands.py         the : palette
-├── plugin_loader.py    plugin discovery and API
-├── theme.py            themes and color roles
-├── themes/             bundled themes
-└── plugins/            bundled plugins
+├── install.sh            installer (pipx, uv, or native)
+├── pyproject.toml        package metadata and the nnano command
+├── VERSION
+├── neonano/
+│   ├── main.py           entry point and main loop
+│   ├── config.default.toml   documented defaults
+│   ├── config.py         config loading and merging
+│   ├── keys.py           key names and keymap
+│   ├── buffer.py         text, selection, undo snapshots
+│   ├── editor.py         drawing, prompt, layout, messages
+│   ├── actions.py        built-in keybind actions
+│   ├── commands.py       the : palette
+│   ├── plugin_loader.py  plugin discovery and API
+│   ├── theme.py          themes and color roles
+│   ├── themes/           bundled themes
+│   └── plugins/          bundled plugins
 ```
 
 ## License
