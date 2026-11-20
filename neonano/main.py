@@ -1,12 +1,12 @@
 import curses
 import sys
 
-import neonano.config as cfgmod
-from neonano.actions import ACTIONS
-from neonano.buffer import Buffer
-from neonano.editor import Editor
-from neonano.plugin_loader import load_plugins
-from neonano.theme import build_theme
+import config as cfgmod
+from actions import ACTIONS
+from buffer import Buffer
+from editor import Editor
+from plugin_loader import load_plugins
+from theme import build_theme
 
 WELCOME = "F1 palette  Ctrl+S save  Ctrl+X quit  Alt+I config"
 
@@ -38,12 +38,7 @@ def main(stdscr, path):
     else:
         ed.message(WELCOME)
 
-    while not ed.should_quit:
-        ed.tick()
-        ed.draw()
-        name, text = ed.read_key()
-        if name is None and text is None:
-            continue
+    def handle(name, text):
         action_name = ed.keymap.get(name) if name else None
         if action_name and action_name in ACTIONS:
             try:
@@ -53,18 +48,33 @@ def main(stdscr, path):
         elif text:
             ed.type_char(text)
 
+    def drain_pending():
+        """Handle every key already waiting, so a paste is processed before the next redraw."""
+        saved = ed.idle_ms
+        ed.idle_ms = 0
+        stdscr.timeout(0)
+        try:
+            while not ed.should_quit:
+                name, text = ed.read_key()
+                if name is None and text is None:
+                    break
+                handle(name, text)
+        finally:
+            ed.idle_ms = saved
+            stdscr.timeout(saved)
+
+    while not ed.should_quit:
+        ed.tick()
+        ed.draw()
+        name, text = ed.read_key()
+        if name is None and text is None:
+            continue
+        handle(name, text)
+        drain_pending()
+
     ed.emit("exit")
 
 
-def run():
-    """Console-script entry point (the `nnano` command)."""
-    if len(sys.argv) > 1 and sys.argv[1] == "--version":
-        from importlib.metadata import version
-        print(f"neonano {version('neonano')}")
-        return
+if __name__ == "__main__":
     file_path = sys.argv[1] if len(sys.argv) > 1 else None
     curses.wrapper(main, file_path)
-
-
-if __name__ == "__main__":
-    run()
