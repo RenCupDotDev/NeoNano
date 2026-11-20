@@ -2,7 +2,7 @@
 import subprocess
 import tomllib
 
-from neonano.theme import list_themes
+from theme import list_themes
 
 COMMANDS = {}
 

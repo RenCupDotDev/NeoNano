@@ -1,8 +1,8 @@
 """Built-in actions. Keybinds in config.toml [keys] point at these names.
 Plugins add their own with api.action(name)."""
-from neonano.commands import run_palette
-from neonano.theme import list_themes
-from neonano.editor import CYCLE
+from commands import run_palette
+from theme import list_themes
+from editor import CYCLE
 
 ACTIONS = {}
 

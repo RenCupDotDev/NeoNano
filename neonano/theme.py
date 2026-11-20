@@ -1,7 +1,7 @@
 import curses
 import tomllib
 
-from neonano.config import search_dirs
+from config import search_dirs
 
 DEFAULTS = {
     "background": "#2a2e45",

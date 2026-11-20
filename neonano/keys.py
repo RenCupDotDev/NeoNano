@@ -37,8 +37,11 @@ def key_name(key):
         return NAMED.get(key)
     if key in CHAR_NAMES:
         return CHAR_NAMES[key]
-    if len(key) == 1 and 1 <= ord(key) <= 26:
-        return "ctrl+" + chr(ord(key) + 96)
+    code = ord(key) if len(key) == 1 else 0
+    if 1 <= code <= 26:
+        return "ctrl+" + chr(code + 96)
+    if 28 <= code <= 31:
+        return "ctrl+" + chr(code + 64)  # \x1c ctrl+\, \x1d ctrl+], \x1e ctrl+^, \x1f ctrl+_
     return key
 
 

@@ -3,9 +3,9 @@ and optionally a resources/ folder next to it."""
 import importlib.util
 from pathlib import Path
 
-from neonano.actions import action
-from neonano.commands import command
-from neonano.config import search_dirs
+from actions import action
+from commands import command
+from config import search_dirs
 
 
 class PluginAPI:
