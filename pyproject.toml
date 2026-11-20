@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "neonano"
-version = "0.2.1"
+version = "0.2.2"
 description = "A terminal text editor: nano-style editing with a ':' command palette"
 readme = "README.md"
 license = { file = "LICENSE" }
