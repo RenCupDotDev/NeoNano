@@ -12,7 +12,6 @@ press F1 to open a `:` command palette in the style of vi, run commands, change
 settings live, and load plugins. Everything is configurable: colors, themes,
 keybinds, line numbers, autosave, and more.
 
-check out the NeoNano page [Here](rencupdotdev.github.io/NeoNano) 
 ---
 
 ## Installation
