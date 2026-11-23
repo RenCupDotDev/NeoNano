@@ -92,6 +92,9 @@ Undo groups: typing and Enter form one step, and a run of Backspace or Delete fo
 | Move the focused pane next to its neighbour | Ctrl+Shift+arrows |
 | Cycle focus between panes | F9 |
 | Return focus to the editor from a pane | Esc |
+| Close the focused pane, works from the editor too (not the editor itself). No default key: bind it with `close_pane` below | none |
+
+The `close_pane` action works from the editor and from any pane, and it does not replace a plugin's own close key. Bind it in `[keys]`, for example `close_pane = ["ctrl+w"]`, or run `close` from the palette. Plugin panes are still closed by their plugin.
 
 Ctrl+arrows and Ctrl+Shift+arrows only work in terminals that send the standard xterm codes (most do: GNOME Terminal, Konsole, iTerm2, Windows Terminal, xterm). Plain arrows work everywhere.
 
