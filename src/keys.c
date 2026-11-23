@@ -40,6 +40,7 @@ static const char *act_names[ACT_COUNT] = {
     "insert_newline", "delete_back", "delete_forward", "indent", "unindent",
     "toggle_line_numbers", "toggle_relative", "toggle_current_line",
     "cycle_theme", "reload_config", "open_config", "word_count",
+    "close_pane",
 };
 
 typedef struct { int key; Action act; } Binding;

@@ -259,6 +259,9 @@ static void run_action(Editor *e, Action a) {
     case ACT_DUPLICATE:   duplicate_line(e); break;
     case ACT_CANCEL:      clear_mark(e);     break;
     case ACT_REDRAW:      clear();           break;
+    case ACT_CLOSE_PANE:
+        if (!layout_close_focused()) set_msg(e, "Nothing to close: the editor is the only pane");
+        break;
 
     case ACT_LEFT:        move_left(e);      break;
     case ACT_RIGHT:       move_right(e);     break;
@@ -354,7 +357,7 @@ void input_event(Editor *e, int key, unsigned int cp) {
         if (pc) { run_command_line(e, pc); return; }
         Action a = keymap_lookup(key);
         /* quit is not global: inside a pane, exit with :exit from the palette */
-        if (a == ACT_PALETTE || a == ACT_SAVE || a == ACT_FIND)
+        if (a == ACT_PALETTE || a == ACT_SAVE || a == ACT_FIND || a == ACT_CLOSE_PANE)
             run_action(e, a);
         return;
     }

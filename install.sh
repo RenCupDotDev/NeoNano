@@ -17,6 +17,10 @@
 #     sha256 GitHub publishes for every asset),
 #   - the assets themselves, each checked against its sha256 before it is used.
 #
+# With --git it clones the NeoNano and NeoNanoQOL repositories and compiles
+# them instead. A git build has no release digest to check against, so it
+# builds exactly the default branch it cloned over HTTPS from GitHub.
+#
 #   curl -fsSL https://raw.githubusercontent.com/RenCupDotDev/NeoNano/main/install.sh | bash
 
 set -euo pipefail
@@ -26,6 +30,9 @@ QOL_REPO="RenCupDotDev/NeoNanoQOL"
 
 # GitHub API base. NEONANO_GITHUB_API replaces it (a mirror, or a test server).
 GITHUB_API="${NEONANO_GITHUB_API:-https://api.github.com}"
+
+# Git base for --git. NEONANO_GIT_BASE replaces https://github.com (a mirror, or a test).
+GIT_BASE="${NEONANO_GIT_BASE:-https://github.com}"
 
 # ---- options ----------------------------------------------------------------
 MODE=user            # user | system
@@ -39,6 +46,7 @@ QOL_CHOICE=ask       # ask | yes | no
 QOL_PLUGINS=""       # comma-separated names, or "all"
 NN_TAG=""            # empty: the latest NeoNano release
 QOL_TAG=""           # empty: the latest NeoNanoQOL release
+GIT_BUILD=0          # --git: clone and compile instead of using the releases
 
 usage() {
     cat <<'EOF'
@@ -52,6 +60,7 @@ Usage: install.sh [options]
   --qol-plugins LIST     comma-separated plugin names, or "all"
   --neonano-tag TAG      install this NeoNano release instead of the latest
   --qol-tag TAG          install this NeoNanoQOL release instead of the latest
+  --git                  clone and compile NeoNano and the plugins (needs git, make, cc)
   --uninstall            remove what the last install put in place
   --purge                uninstall and also delete the config and state
   -n, --dry-run          print what would happen; change nothing
@@ -75,6 +84,7 @@ while [ $# -gt 0 ]; do
         --qol-plugins)    QOL_PLUGINS="${2:?--qol-plugins needs a list}"; shift ;;
         --neonano-tag)    NN_TAG="${2:?--neonano-tag needs a tag}"; shift ;;
         --qol-tag)        QOL_TAG="${2:?--qol-tag needs a tag}"; shift ;;
+        --git)            GIT_BUILD=1 ;;
         -h|--help)        usage; exit 0 ;;
         *)                echo "error: unknown option: $1 (try --help)" >&2; exit 1 ;;
     esac
@@ -131,13 +141,17 @@ confirm() {
 }
 
 check_platform() {
-    need curl; need jq; need sha256sum; need install; need awk; need sed
-    need grep; need tr; need cut; need mktemp
+    need install; need awk; need sed; need grep; need tr; need cut; need mktemp
+    if [ "$GIT_BUILD" = 1 ]; then
+        need git; need make; need cc
+    else
+        need curl; need jq; need sha256sum
+        case "$(uname -m)" in
+            x86_64|amd64) ;;
+            *) die "there is no NeoNano release build for $(uname -m): x86_64 only (use --git to compile it)" ;;
+        esac
+    fi
     [ "$(uname -s)" = Linux ] || die "Linux only"
-    case "$(uname -m)" in
-        x86_64|amd64) ;;
-        *) die "there is no NeoNano build for $(uname -m): x86_64 only" ;;
-    esac
     if [ "$MODE" = system ]; then need getent; fi
     if command -v ldconfig >/dev/null 2>&1; then
         ldconfig -p > "$TMP/ld.txt" 2>/dev/null || true
@@ -325,6 +339,14 @@ download_asset() {
 }
 
 # ---- NeoNano ----------------------------------------------------------------
+# git_clone REPO DIR: a shallow clone of the default branch of REPO into DIR.
+git_clone() {
+    local repo="$1" dir="$2"
+    log "  cloning $repo"
+    git clone --quiet --depth 1 "$GIT_BASE/$repo.git" "$dir" \
+        || die "could not clone $GIT_BASE/$repo.git"
+}
+
 installed_nn_version() {
     local b="$BIN_DIR/nnano"
     [ -x "$b" ] || return 0
@@ -333,10 +355,16 @@ installed_nn_version() {
 
 do_neonano() {
     step "NeoNano"
-    release_json "$NEONANO_REPO" "$NN_TAG" "$TMP/nn.json"
-    download_asset "$TMP/nn.json" VERSION "$TMP/nn-VERSION"
-    local new cur="" bin="$BIN_DIR/nnano"
-    new="$(tr -d '[:space:]' < "$TMP/nn-VERSION")"
+    local new cur="" bin="$BIN_DIR/nnano" src_bin=""
+    if [ "$GIT_BUILD" = 1 ]; then
+        log "building NeoNano from git"
+        git_clone "$NEONANO_REPO" "$TMP/nn-src"
+        new="$(tr -d '[:space:]' < "$TMP/nn-src/VERSION")"
+    else
+        release_json "$NEONANO_REPO" "$NN_TAG" "$TMP/nn.json"
+        download_asset "$TMP/nn.json" VERSION "$TMP/nn-VERSION"
+        new="$(tr -d '[:space:]' < "$TMP/nn-VERSION")"
+    fi
 
     if [ -e "$bin" ]; then cur="$(installed_nn_version)"; cur="${cur:-unknown}"; fi
     if [ -z "$cur" ]; then
@@ -349,9 +377,15 @@ do_neonano() {
         if [ "$UPDATE" = 0 ] && ! ask "Update NeoNano to $new?" y; then return 0; fi
     fi
 
-    download_asset "$TMP/nn.json" nnano "$TMP/nnano"
+    if [ "$GIT_BUILD" = 1 ]; then
+        make -s -C "$TMP/nn-src" nnano || die "compiling NeoNano failed"
+        src_bin="$TMP/nn-src/nnano"
+    else
+        download_asset "$TMP/nn.json" nnano "$TMP/nnano"
+        src_bin="$TMP/nnano"
+    fi
     run install -d "$BIN_DIR"
-    place_file "$TMP/nnano" "$bin" nnano 755
+    place_file "$src_bin" "$bin" nnano 755
     printf 'nn_version=%s\n' "$new" >> "$TMP/nn_record"
     NN_NOW="$new"
 }
@@ -394,15 +428,29 @@ choose_plugins() {
 
 do_qol() {
     step "NeoNanoQOL"
-    release_json "$QOL_REPO" "$QOL_TAG" "$TMP/qol.json"
-    download_asset "$TMP/qol.json" VERSION "$TMP/qol-VERSION"
     local new cur
-    new="$(tr -d '[:space:]' < "$TMP/qol-VERSION")"
+    if [ "$GIT_BUILD" = 1 ]; then
+        log "building NeoNanoQOL from git"
+        git_clone "$QOL_REPO" "$TMP/qol-src"
+        make -s -C "$TMP/qol-src" || die "compiling NeoNanoQOL failed"
+        new="$(tr -d '[:space:]' < "$TMP/qol-src/VERSION")"
+    else
+        release_json "$QOL_REPO" "$QOL_TAG" "$TMP/qol.json"
+        download_asset "$TMP/qol.json" VERSION "$TMP/qol-VERSION"
+        new="$(tr -d '[:space:]' < "$TMP/qol-VERSION")"
+    fi
     cur="$(manifest_all qol_version | head -n1)"
 
-    # The plugins are the .so files of the release. Names are checked before use.
+    # The plugins are the .so files of the release, or of the build. Names are checked before use.
     local -a avail=() prev=() todo=()
-    mapfile -t avail < <(jq -r '.assets[].name | select(endswith(".so")) | rtrimstr(".so")' "$TMP/qol.json")
+    if [ "$GIT_BUILD" = 1 ]; then
+        local f
+        for f in "$TMP/qol-src/build"/*.so; do
+            [ -e "$f" ] && avail+=("$(basename "$f" .so)")
+        done
+    else
+        mapfile -t avail < <(jq -r '.assets[].name | select(endswith(".so")) | rtrimstr(".so")' "$TMP/qol.json")
+    fi
     [ "${#avail[@]}" -gt 0 ] || die "the NeoNanoQOL release has no .so plugins"
     local a
     for a in "${avail[@]}"; do
@@ -436,7 +484,11 @@ do_qol() {
 
     local n
     for n in "${todo[@]}"; do
-        download_asset "$TMP/qol.json" "$n.so" "$TMP/qol-$n.so"
+        if [ "$GIT_BUILD" = 1 ]; then
+            cp "$TMP/qol-src/build/$n.so" "$TMP/qol-$n.so"
+        else
+            download_asset "$TMP/qol.json" "$n.so" "$TMP/qol-$n.so"
+        fi
     done
     run install -d "$PLUGIN_DIR"
     for n in "${todo[@]}"; do

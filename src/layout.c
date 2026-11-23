@@ -246,6 +246,13 @@ static Node *remove_leaf(Node *n, Pane *p) {
     return n;
 }
 
+bool layout_close_focused(void) {
+    Pane *f = layout_focused();
+    if (!f || f->is_editor) return false;
+    layout_close(f->id);
+    return true;
+}
+
 void layout_close(int id) {
     Pane *p = layout_find(id);
     if (!p || p->is_editor) return;

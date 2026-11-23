@@ -24,6 +24,7 @@
 #include "commands.h"
 #include "config.h"
 #include "keys.h"
+#include "layout.h"
 #include "plugin.h"
 #include "theme.h"
 #include "undo.h"
@@ -244,6 +245,11 @@ static void c_reload(Editor *e, const char *arg)  { (void)arg; reload_all(e); }
 static void c_wc(Editor *e, const char *arg)      { (void)arg; cmd_word_count(e); }
 static void c_plugins(Editor *e, const char *arg) { (void)arg; plugins_list(e); }
 
+static void c_close(Editor *e, const char *arg) {
+    (void)arg;
+    if (!layout_close_focused()) set_msg(e, "Nothing to close: the editor is the only pane");
+}
+
 static void c_help(Editor *e, const char *arg) {
     if (*arg) {
         Command *c = find_cmd(arg);
@@ -290,6 +296,7 @@ void commands_init(void) {
     cmd_register("cfg",        "cfg  open config.toml", c_cfg);
     cmd_register("cfg!",       "cfg!  open config.toml, discarding changes", c_cfg_force);
     cmd_register("plugins",    "plugins  list loaded plugins", c_plugins);
+    cmd_register("close",      "close  close the focused pane (not the editor)", c_close);
     cmd_register("help",       "help [command]  list commands, or show one's usage", c_help);
 }
 

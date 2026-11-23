@@ -63,6 +63,7 @@ void  layout_focus_next(void);
 Pane *layout_find(int id);
 int   layout_open(const char *name, int side, int percent, PaneKeyFn fn, void *ud);
 void  layout_close(int id);
+bool  layout_close_focused(void);           /* false if the editor has focus */
 void  layout_set_lines(int id, const char **lines, int n);
 void  layout_set_cursor(int id, int row);
 void  layout_resize(int dir);               /* dir: 0 up, 1 down, 2 right, 3 left */
